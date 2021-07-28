@@ -5,6 +5,7 @@ const crypto = require('crypto');
 class User extends Model {
   static associate(models) {
     User.hasMany(models.Posts)
+    User.belongsToMany(models.Roles, {through: models.Userroles})
   }
 
   static getHashedPassword(password) {

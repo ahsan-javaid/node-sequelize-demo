@@ -4,7 +4,13 @@ const Op = Sequelize.Op;
 
 module.exports =  (router) => {
   router.get('/', async (req, res) => {
-    const users = await db.Users.findAll({ });
+    const users = await db.Users.findAll({
+      include: [
+        {
+          model: db.Roles,
+        },
+      ],
+    });
     res.json({users: users});
   });
 
@@ -48,5 +54,64 @@ module.exports =  (router) => {
     const user = await db.Users.create(req.body);
 
     res.json({user: user, token: user.createAPIToken()});
+  });
+
+  //Custom API for Assigning a Role to a User
+  router.post('/assign/:name', async (req, res) => {
+    try {
+      
+      const user = await db.Users.findOne({where: {
+        id: req.user.id,
+      }});
+
+      const role = await db.Roles.findOne({ where: {
+        name: req.params.name,
+      }});
+
+      if(!role){
+        res.json({success: false, message: "Role does not exist!"});
+      }
+      else{
+        await user.addRole(role);
+        //console.log(user.toJSON());
+
+        res.json({success: true, message: "Role assigned!", data: user});
+      }
+
+    } catch (error) {
+      res.json({error: error.toString()});
+    }
+  });
+
+  //API for deleting a User role
+  router.delete('/remove/:name', async (req, res) => {
+    try {
+      
+      const user = await db.Users.findOne({
+        where: {id: req.user.id},
+        include: [
+          {
+            model: db.Roles,
+          },
+        ]
+      });
+      
+      const role = await db.Roles.findOne({ where: {
+        name: req.params.name,
+      }});
+
+      if(await user.hasRole(role)){
+        await user.removeRole(role);
+        //console.log(user.toJSON());
+        res.json({success: true, message: "Role revoked!"});
+      }
+      else{
+        console.log("ROLE NOT FOUND!");
+        res.json({success: false, message: "User does not have the specified Role!"});
+      }
+
+    } catch (error) {
+      res.json({error: error.toString()});
+    }
   });
 };
