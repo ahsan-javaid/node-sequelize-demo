@@ -24,7 +24,8 @@ module.exports = (router) => {
         },
       }
     );
-    if (role) {
+
+    if (role[0] === 1) {
       res.status(400).json({ msg: "Role updated" });
     } else {
       res.status(400).json({ msg: "Role not found" });
@@ -37,7 +38,7 @@ module.exports = (router) => {
         role: req.body.role,
       },
     });
-    if (role) {
+    if (role === 1) {
       res.status(200).json({ msg: "Role is deleted" });
     } else {
       res.status(400).json({ msg: "Role not found" });
@@ -91,7 +92,7 @@ module.exports = (router) => {
           roleId: role.id,
         },
       });
-      if (role) {
+      if (roleToDelete === 1) {
         res.status(200).json({ msg: "Role is deleted" });
       } else {
         res.status(400).json({ msg: "Role not found" });

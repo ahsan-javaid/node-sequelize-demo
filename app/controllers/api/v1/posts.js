@@ -16,6 +16,8 @@ module.exports = (router) => {
           model: db.Users,
         },
       ],
+      limit: req.body.limit,
+      offset: req.body.offset,
     });
     res.json({ posts: posts });
   });
@@ -30,6 +32,8 @@ module.exports = (router) => {
           model: db.Users,
         },
       ],
+      limit: req.body.limit,
+      offset: req.body.offset,
     });
     res.json({ posts: posts });
   });
@@ -47,7 +51,8 @@ module.exports = (router) => {
         },
       }
     );
-    if (post) {
+
+    if (post[0] === 1) {
       res.status(400).json({ msg: "Post updated" });
     } else {
       res
@@ -63,7 +68,8 @@ module.exports = (router) => {
         user_id: req.user.id,
       },
     });
-    if (post) {
+    console.log(post);
+    if (post === 1) {
       res.status(200).json({ msg: "Post is deleted" });
     } else {
       res
