@@ -6,18 +6,36 @@ module.exports =  (router) => {
 
   //Old get and post
   router.post('/', async (req, res) => {
-    req.body.userId = req.user.id;
-    const post = await db.Posts.create(req.body);
-    res.json({post: post});
+    try {
+      req.body.userId = req.user.id;
+
+      const post = await db.Posts.create(req.body);
+
+      res.json({post: post});
+    } catch (error) {
+      return res.status(400).json({error: error.json()});
+    }
   });
 
   router.get('/', async (req, res) => {
-    const posts = await db.Posts.findAll({
-      include: [{
-        model: db.Users
-      }]
-    });
-    res.json({posts: posts});
+    try {
+      const page = req.query.page;
+      let users;
+
+      if(!page){
+        console.log("Getting All Posts!");
+        users = await db.Posts.findAll({ });
+      }
+      else{
+        console.log("Page : " + page);
+        const offset = (page == 0)? 0 : (page - 1) * 10;
+        console.log("Getting Posts from " + offset);
+        users = await db.Posts.findAll({ offset: offset, limit: 10 });
+      }
+      res.json({users});
+    } catch (error) {
+      return res.status(400).json({error: error.json()});
+    }
   });
 
   //Update and Delete of CRUD by Hamd Zulfiqar
@@ -36,13 +54,12 @@ module.exports =  (router) => {
         post.title = title;
         post.body = body;
 
-        post.save();
-        res.statusCode = 200;
+        await post.save();
+
         res.json({success: true, message: "Post updated", data: post});
       }
     } catch (error) {
-      res.statusCode = 500;
-      res.json({success: false, message: error});
+      res.status(400).json({error: error.toString()});
     }
   });
 
